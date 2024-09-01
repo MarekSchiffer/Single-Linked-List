@@ -2,15 +2,15 @@
 #define LINKEDLIST_H_
 
 typedef struct _list {
-	 struct _node* head;
-	 struct _node* tail;
-	 int size;
-	 void (*freeFn)(void*);
+   struct _node* head;
+   struct _node* tail;
+   int size;
+   void (*freeFn)(void*);
 } list;
 
 typedef struct _node {
-	 void* data;
-	 struct _node* next;
+   void* data;
+   struct _node* next;
 } node;
 
 typedef void (*ListMapFunction)(void* v1, void* v2);
