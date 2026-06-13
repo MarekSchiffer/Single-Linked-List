@@ -1,268 +1,277 @@
-#include "linkedList.h"
+#include "linkedlist.h"
 
-linked_list_t ListInit(void (*freeFn)(void*)) {
-  linked_list_t localList;
-//  localList.head = malloc(sizeof(node_t));
-  localList.head = NULL;
-  localList.tail = NULL;
-  localList.size = 0;
-  localList.freeFn = freeFn;
+typedef struct node_s {
+  struct node_s *next;
+  void *data;
+} node_t;
 
-  return localList;
+
+void ListInit(linked_list_t *sll, size_t elmSize, sll_freeFn freeFn) {
+
+  sll->head = NULL;
+  sll->tail = NULL;
+  sll->size = 0;
+  sll->elmSize = elmSize;
+  sll->fullNodeSize = sizeof(node_t) + sll->elmSize - sizeof(void*);
+  sll->freeFn = (freeFn) ?  freeFn :  NULL;
 }
 
-void ListDispose(linked_list_t* l) {
-  node_t* current = l->head;
-  node_t* next;
 
-  if (l->freeFn != NULL) {
+void ListDispose(linked_list_t *sll) {
 
-    while(current != NULL) {
-     l->freeFn(&current->data);
+    node_t *current = sll->head;
+    node_t *next_node = NULL;
 
-     next = current->next;
-     free(current);
-     current = next;
+    if (sll->freeFn) {
+      for ( ; current ; ) {
+      sll->freeFn(&current->data);
+
+      next_node = current->next;
+      free(current);
+      current = next_node;
+      }
     }
-  }
-  else{
-  while( current != NULL) {
-    next = current->next;
-    free(current);
-    current = next;
-  }
-  }
-
-}
-
-void ListInsert_front(linked_list_t* l, void* elmAdr) {
-      node_t* newNode = malloc(sizeof(node_t));
-      newNode->data = elmAdr;
-      newNode->next = l->head;
-      l->head = newNode;
-      l->size +=1;
-
-  if ( l->tail == NULL ) { l->tail = newNode; }
-}
-
-void ListInsert(linked_list_t* l, void* elmAdr) {
-
-  if ( l->tail == NULL && l->size == 0) { ListInsert_front(l,elmAdr); return; }
-
-  node_t* newNode = malloc(sizeof(node_t));
-  newNode->data = elmAdr;
-  newNode->next = NULL;
-
-  (l->tail)->next = newNode;
-  l->tail = newNode;
-  l->size++;
-}
-
-void ListRemove(linked_list_t* l, void** elmAdr) {
-  assert( l->head != NULL);
-
-  if (elmAdr != NULL) {
-    *elmAdr = (l->head)->data;
-  }
-  else {
-  if (l->freeFn != NULL ) { l->freeFn(&(l->head)->data); }
-  }
-
-  if (l->head == l->tail) { l->tail = NULL; }
-
-  node_t* next = (l->head)->next;
-  free(l->head);
-  l->head = next;
-  l->size -=1;
-}
-
-void ListRemove_back(linked_list_t* l,void** elmAdr) {
-  node_t* current = l->head;
-
-  if ( elmAdr != NULL) { *elmAdr = (l->tail)->data; }
-  else {
-    if ( l->freeFn != NULL ) {
-     l->freeFn(&(l->tail)->data);
+    else {
+      for ( ; current ; ) {
+        next_node = current->next;
+        free(current);
+        current = next_node;
+      }
     }
+
+    sll->head = NULL;
+    sll->tail = NULL;
+    sll->size = 0;
+    sll->elmSize = 0;
+    sll->fullNodeSize = 0;
+    sll->freeFn = NULL;
+}
+
+
+#define SLL_INSERT_BACK(sll,elmAddr) \
+  do { \
+  node_t *new_node  = malloc( sll->fullNodeSize ); \
+  new_node->next = NULL; \
+  elmAddr ? memcpy(&new_node->data,elmAddr,sll->elmSize) : (void*)0; \
+  sll->tail->next = new_node; \
+  sll->tail = new_node; \
+  ++sll->size; \
+  } while(false);
+
+
+#define SLL_INSERT_FRONT(sll,elmAddr)  \
+  do { \
+  node_t *new_node = malloc( sll->fullNodeSize ); \
+  elmAddr ? memcpy(&new_node->data,elmAddr,sll->elmSize) : (void*)0; \
+  new_node->next = sll->head; \
+  if ( sll->head == NULL ) { sll->tail = new_node; } \
+  sll->head = new_node; \
+  ++sll->size; \
+  } while(false);
+
+
+#define SLL_REMOVE_FRONT(sll,elmAddr) \
+  do { \
+    elmAddr ? memcpy(elmAddr,&sll->head->data,sll->elmSize) : (void*)0; \
+    node_t *tmp = sll->head->next; \
+    (!elmAddr && sll->freeFn) ? sll->freeFn(&sll->head->data): (void*)0; \
+    free(sll->head); \
+    sll->head=tmp; \
+    if (sll->head == NULL) { sll->tail = NULL; } \
+    --sll->size; \
+  } while(false);
+
+
+#define SLL_REMOVE_BACK(sll,elmAddr) \
+  do { \
+    node_t **current = &sll->head; \
+    for ( ; (*current)->next != sll->tail; current = &(*current)->next); \
+    assert ( (*current)->next == sll->tail ); \
+    elmAddr ? memcpy(elmAddr,&sll->tail->data,sll->elmSize) : (void*)0; \
+    (!elmAddr && sll->freeFn) ? sll->freeFn(&sll->tail->data): (void*)0; \
+    free(sll->tail); \
+    sll->tail = *current; \
+    (*current)->next = NULL; \
+    --sll->size; \
+  } while (false);
+
+
+#define REMOVE_LAST_EXISTING_ELEMENT(sll,elmAddr) \
+  do { \
+  elmAddr ? memcpy(elmAddr, &sll->head->data,sll->elmSize) : (void*)0 ; \
+  (!elmAddr && sll->freeFn) ? sll->freeFn(&sll->head->data): (void*)0; \
+  free(sll->head); \
+  sll->head = NULL; \
+  sll->tail = NULL; \
+  --sll->size; \
+  } while(false);
+
+
+#define INSERT_AT_POSITION(sll,current,elmAddr) \
+  do { \
+  node_t *new_node = malloc( sll->fullNodeSize ); \
+  elmAddr ? memcpy(&new_node->data,elmAddr,sll->elmSize) : (void*)0; \
+  new_node->next = (*current); \
+  *current = new_node; \
+  ++sll->size; \
+  } while (false);
+
+
+#define REMOVE_AT_POSITION(sll,current,elmAddr) \
+  do { \
+  elmAddr ? memcpy(elmAddr,&(*current)->data,sll->elmSize): (void*)0; \
+  node_t *next = (*current)->next; \
+  (!elmAddr && sll->freeFn) ? sll->freeFn(&(*current)->data): (void*)0; \
+  free(*current); \
+  *current = next; \
+  --sll->size; \
+  } while(false);
+
+
+void remove_at_position(linked_list_t *sll, node_t **current, void *elmAddr) {
+  elmAddr ? memcpy(elmAddr,&(*current)->data,sll->elmSize): (void*)0;
+  node_t *next = (*current)->next;
+  free(*current);
+  *current = next;
+  --sll->size;
+}
+
+void ListInsert(linked_list_t *sll, void *elmAddr) {
+  if ( !sll->head && !sll->tail ) { SLL_INSERT_FRONT(sll,elmAddr); return; }
+  SLL_INSERT_BACK(sll,elmAddr);
+}
+
+
+void ListInsert_front(linked_list_t *sll, void *elmAddr) {
+  SLL_INSERT_FRONT(sll,elmAddr);
+}
+
+
+void ListRemove(linked_list_t *sll, void *elmAddr) {
+
+  if (!sll->head) { return; }
+
+  if ( sll->head->next ) { SLL_REMOVE_FRONT(sll,elmAddr); return; }
+  REMOVE_LAST_EXISTING_ELEMENT(sll,elmAddr);
+}
+
+
+void ListRemove_back(linked_list_t *sll, void *elmAddr) {
+
+  if ( !sll->head || !sll->tail ) { return; }
+
+  if ( sll->head != sll->tail ) { SLL_REMOVE_BACK(sll,elmAddr); return; }
+  REMOVE_LAST_EXISTING_ELEMENT(sll,elmAddr);
+ }
+
+
+void ListInsertNth(linked_list_t *sll, void *elmAddr, size_t pos) {
+
+  if ( pos == 0 ) { SLL_INSERT_FRONT(sll,elmAddr); return; }
+
+  node_t **current = &sll->head;
+  for ( size_t k=0; k<pos; ++k, current = &(*current)->next);
+  if ( !(*current) ) { SLL_INSERT_BACK(sll,elmAddr); return; }
+
+  INSERT_AT_POSITION(sll,current,elmAddr);
+}
+
+
+void ListRemoveNth(linked_list_t *sll, void *elmAddr, size_t pos) {
+
+  if ( sll->size < pos || pos > sll->size-1 ) { return; }
+  if ( pos == 0 ) { SLL_REMOVE_FRONT(sll,elmAddr); return; }
+  if ( pos == (sll->size-1) ) { SLL_REMOVE_BACK(sll,elmAddr); return; }
+
+  node_t **current = &sll->head;
+  for ( size_t k=0; k<pos ; ++k ) { current = &(*current)->next; }
+  REMOVE_AT_POSITION(sll,current,elmAddr);
+}
+
+
+size_t ListLength(linked_list_t *sll) {
+return sll->size;
+}
+
+
+void ListReturnNth(linked_list_t *sll, void **elmAddr, size_t pos) {
+
+  if ( pos < 0 || pos >= sll->size ) { return; }
+
+  node_t *current = sll->head;
+  for ( size_t k=0 ; k<pos ; ++k ) { current = current->next; }
+  elmAddr ? *elmAddr = &current->data: (void*)0;
+
+}
+
+
+void ListMap(linked_list_t *sll, sll_mapFn mapFn, void *ext) {
+
+  node_t *current = sll->head;
+
+  for ( ; current ; current=current->next ) {
+    mapFn(&current->data,ext);
+  }
+}
+
+
+int32_t ListFind(linked_list_t *sll, void *elmAddr, sll_cmpFn cmpFn, uint32_t start_position) {
+
+  if ( start_position > sll->size || start_position < 0 ) { return -1; }
+
+  node_t *current = sll->head;
+
+  if ( start_position > 0 ) { 
+    for ( size_t k=0; k<=start_position && current; ++k, current=current->next );
   }
 
-  while (current->next != l->tail) {
-    assert( (l->tail)->next == NULL);
+  if ( !current ) { return -1; }
+
+  int32_t cmp_result=0;
+  size_t position = (start_position == 0) ? start_position : start_position+1;
+  for ( ; current ; ++position ) {
+    cmp_result = cmpFn( &current->data, elmAddr );
+    if ( cmp_result == 0 ) {
+      return position;
+    }
     current = current->next;
   }
 
-  free(l->tail);
-  l->tail = current;
-  current->next = NULL;
-  l->size--;
+  return -1;
 }
 
-int ListLength(linked_list_t* l) {
-  return l->size;
+
+static void insert_sorted(linked_list_t *sorted_list, node_t **to_insert_node, sll_cmpFn cmpFn) {
+
+  node_t **current = &sorted_list->head;
+
+  if ( sorted_list->size == 0 ) {  SLL_INSERT_FRONT(sorted_list,&(*to_insert_node)->data); return; }
+  int32_t cmp_result=0;
+
+  for ( ; *current ; current = &(*current)->next ) {
+    cmp_result = cmpFn( &(*current)->data, &(*to_insert_node)->data);
+    if ( cmp_result >= 0 ) { INSERT_AT_POSITION(sorted_list,current,&(*to_insert_node)->data); return; }
+  }
+
+  SLL_INSERT_BACK(sorted_list,&(*to_insert_node)->data);
 }
 
-int ListFind(linked_list_t* l,void* elm,ListCompareFunction cmp,int startPosition) {
-  assert(l->head != NULL);
 
-  node_t* current = l->head;
 
-  int count = 0;
-  while(current->next != NULL) { 
-    if ( count > startPosition && cmp(&current->data,elm) == 0 ) { return count; }
+void ListSort(linked_list_t *sll, sll_cmpFn cmpFn) {
+  linked_list_t sorted_list;
+  ListInit(&sorted_list,sll->elmSize,sll->freeFn);
 
-    current=current->next;
-    count++;
+  node_t **current = &sll->head;
+
+  for ( ; *current; ) {
+    insert_sorted(&sorted_list,current,cmpFn);
+    node_t *tmp = (*current)->next;
+    free(*current);
+    *current = tmp;
   }
 
-  if ( current->next != NULL) { return count; }
-  if ( current->next == NULL && cmp(&current->data,elm) == 0 ) { return count; }
-  else return -1;
+  sll->head = sorted_list.head;
+  sll->tail = sorted_list.tail;
 
-
-}
-
-static void PopPosition(linked_list_t *l, node_t** n, void** elmAdr) {
-
-  void* newNext = ((*n)->next)->next;
-
-  if ( elmAdr != NULL ) {
-  *elmAdr = ((*n)->next)->data;
-  }
-
-  if ( elmAdr == NULL && l->freeFn != NULL ) {
-    l->freeFn(&(*n)->next->data);
-  }
-
-  free((*n)->next);
-  (*n)->next = newNext;
-}
-
-void ListRemoveNth(linked_list_t *l,void** elmAdr, int position) {
-  assert( 0<= position <= l->size);
-  assert( l->head != NULL);
-  assert( l->head != NULL);
-
-  if (position == 0)         { ListRemove(l,elmAdr); return; }
-  if (position == l->size) { ListRemove_back(l,elmAdr); return; }
-
-  node_t* current = l->head;
-
-  for(int i=0; i<position-1; i++) {
-    current = current->next;
-  }
-
-  PopPosition(l,&current,elmAdr);
-  l->size--;
-
-  return;
-
-
-}
-
-static void PushPosition(node_t** n,void* Adr) {
-
-  node_t* newNode = malloc(sizeof(node_t));
-  newNode->data = Adr;
-  newNode->next = (*n)->next;
-  (*n)->next = newNode;
-
-  return;
-}
-
-void ListInsertNth(linked_list_t* l,void* elmAdr, int position) {
-  assert(0<= position <= l->size);
-
-  if (position == 0)         { ListInsert_front(l,elmAdr); return; }
-  if (position == l->size)   { ListInsert(l,elmAdr); return; }
-
-  node_t* current = l->head;
-
-  for(int i=0; i<position-1; i++) {
-    current = current->next;
-  }
-
-  PushPosition(&current,elmAdr);
-  l->size++;
-}
-
-void ListReturnNth(linked_list_t* l,void** elmAdr, int position) {
-  assert(0<= position <= l->size);
-  assert( l->head != NULL);
-
-  node_t* current = l->head;
-
-  for(int i=0; i<position; i++) {
-    current = current->next;
-  }
-
-  *elmAdr = &current->data;
-
-}
-
-void ListMap(linked_list_t* l, ListMapFunction map,void* auxData) {
-  node_t* current = l->head;
-  while(current != NULL ) {
-    map(&current->data,auxData);
-    current=current->next;
-  }
-}
-
-static void insert(const node_t* n, linked_list_t* l, ListCompareFunction cmp) {
-  node_t* current = l->head;
-  node_t* newNode = malloc(sizeof(node_t));
-  newNode->data = n->data;
-
-  if (current == NULL) {
-      newNode->next = NULL;
-      l->head = newNode;
-      l->tail = newNode;
-      l->size +=1;
-      return;
-  }
-
-  if (cmp(&newNode->data,&current->data) <= 0) {
-      newNode->next = l->head;
-      l->head = newNode;
-      l->size +=1;
-    return;
-  }
-
-  while( current->next != NULL && cmp(&newNode->data,&(current->next)->data) > 0) {
-    current = current->next;
-  }
-
-  newNode->next = current->next;
-  current->next = newNode;
-  l->tail = newNode;
-
-  l->size +=1;
-
-  return;
-
-}
-
-void ListSort(linked_list_t* l,ListCompareFunction cmp) {
-  linked_list_t sortedList = ListInit(l->freeFn);
-  node_t* current = l->head;
-
-  int i = 0;
-  while ( current != NULL ) {
-    i++;
-    node_t* toInsert = malloc(sizeof(node_t));
-    toInsert->data = current->data;
-    insert(toInsert,&sortedList,cmp);
-//    if ( i % 1000 == 0 ) {fprintf(stdout,"Still Sorting: %i\n",i); fflush(stdout); }
-
-    node_t* saveCurrent = current;
-    current = current->next;
-    free(saveCurrent);
-    free(toInsert);
-
-  }
-
-  l->head = sortedList.head;
-  l->tail = sortedList.tail;
-  l->size = sortedList.size;
-
-  return;
 }

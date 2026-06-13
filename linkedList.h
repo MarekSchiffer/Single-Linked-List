@@ -1,41 +1,42 @@
-#ifndef LINKEDLIST_H_
-#define LINKEDLIST_H_
+#ifndef _SINGLY_LINKED_LIST_H_
+#define _SINGLY_LINKED_LIST_H_
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <assert.h>
-#include <stdio.h>
+
+typedef void (*sll_freeFn)(void *elmAddr);
+typedef void (*sll_mapFn)(void *elmAddr_1, void *elmAddr_2);
+typedef int (*sll_cmpFn)(const void *elmAddr_1, const void *elmAddr_2);
+
+typedef struct node_s node_t;
 
 typedef struct linked_list_s {
-   struct node_s *head;
-   struct node_s *tail;
-   int size;
-   void (*freeFn)(void*);
+  node_t *head;
+  node_t *tail;
+  size_t fullNodeSize;
+  size_t elmSize;
+  size_t size;
+  sll_freeFn freeFn;
 } linked_list_t;
 
-typedef struct node_s {
-   void *data;
-   struct node_s* next;
-} node_t;
+void ListInit(linked_list_t *sll, size_t elmSize, sll_freeFn freeFn); 
+void ListDispose(linked_list_t *sll);
 
-typedef void (*ListMapFunction)(void *v1, void *v2);
-typedef int (*ListCompareFunction)(const void *v1,const void *v2);
+size_t ListLength(linked_list_t *sll);
+void ListInsert(linked_list_t *sll, void *elmAddr);
+void ListRemove(linked_list_t *sll, void *elmAddr);
 
-linked_list_t ListInit(void (*freeFn)(void*));
-void ListDispose(linked_list_t *l);
+void ListRemove_back(linked_list_t *sll, void *elmAddr);
+void ListInsert_front(linked_list_t *sll, void *elmAddr);
 
-int ListLength(linked_list_t *l);
-void ListInsert(linked_list_t *l,void *elmAdr);
-void ListRemove(linked_list_t *l,void **elmAdr);
+void ListInsertNth(linked_list_t *sll, void *elmAddr, size_t pos);
+void ListRemoveNth(linked_list_t *sll, void *elmAddr, size_t pos);
+void ListReturnNth(linked_list_t *sll, void **elmAddr, size_t pos);
 
-void ListRemove_back(linked_list_t *l,void **elmAdr);
-void ListInsert_front(linked_list_t *l,void *elmAdr);
-
-void ListInsertNth(linked_list_t *l,void *elmAdr,int position);
-void ListRemoveNth(linked_list_t *l,void **elmAdr,int position);
-void ListReturnNth(linked_list_t *l,void **elmAdr, int position);
-
-int ListFind(linked_list_t *l,void* elm,ListCompareFunction cmp,int startPosition);
-void ListMap(linked_list_t *l,ListMapFunction m1,void *auxData);
-void ListSort(linked_list_t *l,ListCompareFunction cmp);
+int32_t ListFind(linked_list_t *sll, void *elmAddr, sll_cmpFn cmpFn, uint32_t start_position);
+void ListMap(linked_list_t *sll, sll_mapFn mapFn, void *ext);
+void ListSort(linked_list_t *sll, sll_cmpFn cmpFn);
 #endif

@@ -3,7 +3,7 @@
 *      This program tests the Singly Linked List and is heavily based on a test by Jerry Cain      *
 *                                                                                                  *
 ***************************************************************************************************/
-#include "linkedList.h"
+#include "linkedlist.h"
 #include <ctype.h>
 #include <DeckOfCards.h>
 
@@ -53,43 +53,43 @@ void printStr(void* elm,void* file) {
   fflush((FILE*)file);
 }
 
-static void InsertAlphabet(linked_list_t *l) {
-  char* tmp;
+static void InsertAlphabet_pointers(linked_list_t *l) {
+  char *tmp;
 
   for(char letter = 'A'; letter <= 'Z'; letter++) {
     tmp = malloc(sizeof(char));
     *tmp = letter;
-    ListInsert(l,tmp);
+    ListInsert(l,&tmp);
   }
-  printf("After inserting Alphabet (ListInsert): \t\t\t\t\t\t\t  ");
+  printf("\x1B[35mAfter inserting Alphabet (ListInsert):\x1b[m \t\t\t\t\t\t\t  ");
   ListMap(l,printPtrChr,stdout);
 
   printf("\n");
 }
 
-static void InsertNumbers(linked_list_t *l) {
+static void InsertNumbers_pointers(linked_list_t *l) {
   int* tmp;
 
   for(int number = '0'; number <= '9'; number++) {
     tmp = malloc(sizeof(char));
     *tmp = number;
-    ListInsert_front(l,tmp);
+    ListInsert_front(l,&tmp);
   }
-  printf("After inserting some numbers in the same List (ListInsert_front): \t\t");
+  printf("\x1b[35mAfter inserting some numbers in the same List (ListInsert_front):\x1b[m \t\t");
   ListMap(l,printPtrChr,stdout);
 
-  printf("\n");
+  fprintf(stdout,"\n");
 }
 
-static void TestCharSort(linked_list_t *l) {
+static void TestCharSort_pointers(linked_list_t *l) {
   ListSort(l,chrPtrCmp);
 
-  printf("List after Sorting (ListSort): \t\t\t\t\t\t\t");
+  printf("\x1b[35mList after Sorting (ListSort):\x1b[m \t\t\t\t\t\t\t");
   ListMap(l,printPtrChr,stdout);
   printf("\n");
 }
 
-static void LowerLetters(linked_list_t *l) {
+static void LowerLetters_pointers(linked_list_t *l) {
 
   for(int i=0; i< ListLength(l); i+=2) {
     char **elm;
@@ -97,20 +97,20 @@ static void LowerLetters(linked_list_t *l) {
     **elm = tolower(**elm);
   }
 
-  fprintf(stdout,"After lowering ever 2nd letter (ReturnNth): \t\t\t\t\t");
+  fprintf(stdout,"\x1b[35mAfter lowering ever 2nd letter (ReturnNth):\x1b[m \t\t\t\t\t");
   ListMap(l,printPtrChr,stdout);
 
 }
 
-void TestInsertDelete(linked_list_t *l) {
+void TestInsertDelete_pointers(linked_list_t *l) {
 
   for (int i=3; i < ListLength(l); i+=4) {
-    char* ch = malloc(sizeof(char));
+    char *ch = malloc(sizeof(char));
     *ch ='-';
-    ListInsertNth(l,ch,i);
+    ListInsertNth(l,&ch,i);
   }
 
-  fprintf(stdout,"\nAfter inserting dashes (ListInsertNth): \t\t\t     ");
+  fprintf(stdout,"\n\x1b[35mAfter inserting dashes (ListInsertNth):\x1b[m \t\t\t     ");
   ListMap(l,printPtrChr,stdout);
   printf("\n");
 
@@ -118,7 +118,7 @@ void TestInsertDelete(linked_list_t *l) {
     ListRemoveNth(l,NULL,i);
   }
 
-  fprintf(stdout,"After deleting dashes (ListRemoveNth): \t\t\t\t\t\t");
+  fprintf(stdout,"\x1b[35mAfter deleting dashes (ListRemoveNth):\x1b[m \t\t\t\t\t\t");
   ListMap(l,printPtrChr,stdout);
 
   for (int i=0; i<3; i++) {
@@ -128,73 +128,74 @@ void TestInsertDelete(linked_list_t *l) {
   *chf ='*';
   *chb ='!';
 
-  ListInsert(l,chb);
-  ListInsert_front(l,chf);
+  ListInsert(l,&chb);
+  ListInsert_front(l,&chf);
 
 }
 
-  fprintf(stdout,"\nAfter Inserting at both ends (ListInsert_front & ListInsert):  \t\t     ");
+  fprintf(stdout,"\n\x1b[35mAfter Inserting at both ends (ListInsert_front & ListInsert):\x1b[m  \t\t     ");
   ListMap(l,printPtrChr,stdout);
 
   void* resFront[3];
   void* resBack[3];
 
   for (int i=0; i<3; i++) {
-  ListRemove(l,(resFront+i));
-  ListRemove_back(l,(resBack+i));
+  ListRemove(l,&resFront[i]);
+  ListRemove_back(l,&resBack[i]);
   }
 
-  fprintf(stdout,"\n\nRemoving both, but saving the result (ListRemove & ListRemove_back): \t\t");
+  fprintf(stdout,"\n\n\x1b[35mRemoving both, but saving the result (ListRemove & ListRemove_back):\x1b[m \t\t");
   ListMap(l,printPtrChr,stdout);
   printf("\n");
   for(int i=0; i<3; i++) {
-    fprintf(stdout,"resFront[%i]: %c, resBack[%i]: %c\t",i,*(char*)resFront[i],i,*(char*)resBack[i]);
+    fprintf(stdout,"\x1b[35mresFront[%i]:\x1b[m %c, \x1b[35m resBack[%i]:\x1b[m  %c\t",i,*(char*)resFront[i],i,*(char*)resBack[i]);
   }
-  fprintf(stdout,"\nWe took ownership back, we need to free the items (free):\n");
+  fprintf(stdout,"\n\x1b[35mWe took ownership back, we need to free the items (free):\x1b[m\n");
   for(int i=0; i<3; i++) {
     free(resFront[i]);
     free(resBack[i]);
   }
   for(int i=0; i<3; i++) {
-    fprintf(stdout,"resFront[%i]: %c, resBack[%i]: %c\t",i,*(char*)resFront[i],i,*(char*)resBack[i]);
+    fprintf(stdout,"\x1b[35mresFront[%i]:\x1b[m %c,\x1b[35m resBack[%i]:\x1b[m %c\t",i,*(char*)resFront[i],i,*(char*)resBack[i]);
   }
-  fprintf(stdout,"\nAnd, they're gone.\n\n");
+  fprintf(stdout,"\n\x1b[35mAnd, they're gone.\x1b[m\n\n");
 }
 
-static void TestFindAndRemove(linked_list_t *l) {
-  fprintf(stdout,"Let's search for H (ListFind): \t...\t");
+static void TestFindAndRemove_pointers(linked_list_t *l) {
+  fprintf(stdout,"\x1b[35mLet's search for H (ListFind):\x1b[m \t...\t");
   char to_find_H = 'H';
   int pos = ListFind(l,&to_find_H,chrPtrChrCmp,0);
   assert (pos != -1);
-  fprintf(stdout,"Found at Position %i\n",pos);
-  fprintf(stdout,"Let's search for @ (ListFind): \t...\t");
+  fprintf(stdout,"\x1b[35mFound at Position\x1b[m %d\n",pos);
+  fprintf(stdout,"\x1b[35mLet's search for @ (ListFind):\x1b[m \t...\t");
   pos = ListFind(l,"@",chrPtrChrCmp,0);
   assert (pos == -1);
-  fprintf(stdout,"Result: %i",pos);
-  fprintf(stdout,", because it's not in there\n");
+  fprintf(stdout,"\x1b[35mResult:\x1b[m %i",pos);
+  fprintf(stdout,"\x1b[35m, because it's not in there\x1b[m\n");
 
   char* chInsert1 = malloc(sizeof(char));
   char* chInsert2 = malloc(sizeof(char));
   *chInsert1 = '@';
   *chInsert2 = '@';
 
-  ListInsertNth(l,chInsert1,11);
-  ListInsertNth(l,chInsert2,13);
+  ListInsertNth(l,&chInsert1,11);
+  ListInsertNth(l,&chInsert2,13);
 
-  fprintf(stdout,"\nInsert some @ at position 11 and 13 (ListInsertNth) \t\t\t      ");
+  fprintf(stdout,"\n\x1b[35mInsert some @ at position 11 and 13 (ListInsertNth) \x1b[m \t\t\t      ");
   ListMap(l,printPtrChr,stdout);
 
-  fprintf(stdout,"\n\nLet's search for @ (ListFind) from position  0:  ...  ");
+  fprintf(stdout,"\n\n\x1b[35mLet's search for @ (ListFind) from position  0:  ...  \x1b[m");
   int pos1 = ListFind(l,"@",chrPtrChrCmp,0);
   assert (pos1 != -1);
-  fprintf(stdout,"Found at Position %i\n",pos1);
-  fprintf(stdout,"Let's search for @ (ListFind) from position 11:  ...  ");
+  fprintf(stdout,"\x1b[35mFound at Position: \x1b[m%i\n",pos1);
+  fprintf(stdout,"\x1b[35mLet's search for @ (ListFind) from position 11:  ...  \x1b[m");
   int pos2 = ListFind(l,"@",chrPtrChrCmp,11);
   assert (pos2 != -1);
-  fprintf(stdout,"Found at Position %i\n",pos2);
+  fprintf(stdout,"\x1b[35mFound at Position \x1b[m %d\n",pos2);
 
-  fprintf(stdout,"\nRemove from the middle, position 18-22 and keep the result (ListRemoveNth):   ");
+  fprintf(stdout,"\n\x1b[35mRemove from the middle, position 18-21 and keep the result (ListRemoveNth):\x1b[m   ");
   ListMap(l,printPtrChr,stdout);
+
   fprintf(stdout,"\n");
 
   void* resMiddle[5];
@@ -203,57 +204,58 @@ static void TestFindAndRemove(linked_list_t *l) {
   }
 
   for (int i=0; i<4; i++) {
-    fprintf(stdout,"resMiddle[%i]: %c, ",i,*(char*)resMiddle[i]);
+    fprintf(stdout,"\x1b[35mresMiddle[%i]:\x1b[m %c, ",i,*(char*)resMiddle[i]);
   }
-  fprintf(stdout,"\nThe Linked List now looks like this: \t\t\t\t\t\t");
+  fprintf(stdout,"\n\x1b[35mThe Linked List now looks like this: \x1b[m \t\t\t\t\t\t");
   ListMap(l,printPtrChr,stdout);
-  fprintf(stdout,"\nWe took ownership of the elments back, we need to free them again ... ");
+  fprintf(stdout,"\n\x1b[35mWe took ownership of the elments back, we need to free them again ... \x1b[m");
   for (int i=0; i<4; i++) {
     free(resMiddle[i]);
   }
-  fprintf(stdout,"Done!\n\n");
+  fprintf(stdout,"\x1b[35mDone!\x1b[m\n\n");
 }
 
-static void TestDispose(linked_list_t *l) {
-  fprintf(stdout,"Returning the Element B (12): (ListReturnNth) ... ");
-  void* finalRemoval;
-  ListReturnNth(l,&finalRemoval,12);
-  fprintf(stdout,"Taken out: %s \n",(char*)finalRemoval);
-  fprintf(stdout,"The element is still in the list we just got a pointer to it. ");
-  fprintf(stdout,"Disposing the Linked List (LinkDispose): ...");
+static void TestDispose_pointers(linked_list_t *l) {
+  fprintf(stdout,"\x1b[35mReturning the Element B (12): (ListReturnNth) ... \x1b[m");
+  char **finalRemoval;
+  ListReturnNth(l,(void**)&finalRemoval,12);
+  fprintf(stdout,"\x1b[35mTaken out: \x1b[m%c \n",**finalRemoval);
+  fprintf(stdout,"\x1b[35mThe element is still in the list we just got a pointer to it. \x1b[m");
+  fprintf(stdout,"\x1b[35mDisposing the Linked List (LinkDispose): ...\x1b[m");
   ListDispose(l);
-  fprintf(stdout,"Done!\n");
-  fprintf(stdout,"The free function also removed the element    ... Taken out: %s\n", (char*)finalRemoval);
+  fprintf(stdout,"\x1b[35mDone!\x1b[m\n");
+  fprintf(stdout,"\x1b[35mThe free function also removed the element    ... Returned out: \x1b[m %s\n","(null)");
   fprintf(stdout,"\n");
-
 }
 
-static void SimpleTest() {
+static void SimpleTest_pointers() {
 
-  fprintf(stdout,"\n------------------------------------   Creating a Singly-Linked-List for chars   ---------------------------------------\n");
-  fprintf(stdout,"------------------------------------   Testing every functionality implemented   ---------------------------------------\n\n");
+  fprintf(stdout,"\n------------------------------------   Creating a Singly-Linked-List for \x1b[35mchars*\x1b[m  ---------------------------------------\n");
+  fprintf(stdout,"------------------------------------   Testing every functionality implemented \x1b[35m(for pointers)\x1b[m  -------------------------\n\n");
 
-  linked_list_t alphabet = ListInit(freePtrChr);
+  linked_list_t alphabet_pointers;
+  ListInit(&alphabet_pointers,sizeof(char*),freePtrChr);
 
-  InsertAlphabet(&alphabet);
-  InsertNumbers(&alphabet);
-  TestCharSort(&alphabet);
-  LowerLetters(&alphabet);
-  TestInsertDelete(&alphabet);
-  TestFindAndRemove(&alphabet);
-  TestDispose(&alphabet);
+  InsertAlphabet_pointers(&alphabet_pointers);
+  InsertNumbers_pointers(&alphabet_pointers);
+  TestCharSort_pointers(&alphabet_pointers);
+  LowerLetters_pointers(&alphabet_pointers);
+  TestInsertDelete_pointers(&alphabet_pointers);
+  TestFindAndRemove_pointers(&alphabet_pointers);
+  TestDispose_pointers(&alphabet_pointers);
 }
 
 static void TestStringList() {
-  
+
   fprintf(stdout,"\n--------------------------------------   Creating a Singly-Linked-List for Strings   ------------------------------------\n\n");
 
-  linked_list_t stringList = ListInit(freeStr);
+  linked_list_t stringList;
+  ListInit(&stringList,sizeof(char*),freeStr);
 
   char* names[] = {strdup("Bob Dylan"), strdup("Shawn Clovin"), strdup("Linda Perry"), strdup("Neil Young"), strdup("Towns van Zandt"), strdup("Bradley Nowell"), strdup("Tom Petty") };
 
   for( int i =0; i<7; i++) {
-    ListInsert(&stringList,names[i]);
+    ListInsert(&stringList,&names[i]);
   }
 
     fprintf(stdout,"\nLinked List filled with Strings:\n");
@@ -266,7 +268,7 @@ static void TestStringList() {
 
     fprintf(stdout,"\n\nRegaining control of the first element (ListRemove): ");
 
-    char* keep;
+    char *keep;
     ListRemove(&stringList,(void*)&keep);
 
     fprintf(stdout,"\t %s \nList now looks like this: \n\n",keep);
@@ -276,166 +278,169 @@ static void TestStringList() {
     fprintf(stdout,"\n\nPrinting names[%i] before freeing: %s ... ",6,names[6]);
 
     ListDispose(&stringList);
-    
-    fprintf(stdout,"Linked List Disposed ... ");
-    fprintf(stdout,"Printing names[%i] after freeing: %s\n",6,names[6]);
-    fprintf(stdout,"We still have: \t %s \t",keep);
-    fprintf(stdout,"Freeing the strdup memory with free(keep)\n");
-    free(keep);
-} 
 
-static void InsertPermutationOfNumber(linked_list_t *l, long n, long d) {
+    fprintf(stdout,"Linked List Disposed ... ");
+    fprintf(stdout,"Printing names[%i] after freeing (UB): %s\n",6,names[6]);
+    fprintf(stdout,"We still have: \t %s \t",keep);
+    fprintf(stdout,"Freeing the strdup memory with free(keep)\t");
+    free(keep);
+    fprintf(stdout,"Done!\n");
+}
+
+static void InsertPermutationOfNumber_pointers(linked_list_t *l, long n, long d) {
   clock_t start, end; char result[12];
 
-  fprintf(stdout,"Generating one permutation of all numbers between [0,%ld] \n",d);
+  fprintf(stdout,"\x1b[35mGenerating one permutation of all numbers between [0,%ld] \x1b[m\n",d);
 
   for(long k=0; k<d; k++) {
      long *residue = malloc(sizeof(long));
      *residue = (long) (((long long)k * (long long)n) % d);
-     ListInsert(l,residue);
-  }  
+     ListInsert(l,&residue);
+  }
 
 }
 
-static void FindANumber(linked_list_t *l,int* toFind) {
+static void FindANumber_pointers(linked_list_t *l,int* toFind) {
   int position;
-  
-  fprintf(stdout, "Looking for number %i in the list \t\t ... \t\t ",*toFind);
+
+  fprintf(stdout, "\x1b[35mLooking for number %i in the list \t\t ... \t\t \x1b[m",*toFind);
   fflush(stdout);
 
   position = ListFind(l,toFind,intPtrIntCmp,0);
 
-  fprintf(stdout, "Found! It's at position %i\n\n",position);
+  fprintf(stdout, "\x1b[35mFound! It's at position \x1b[m%d\n\n",position);
   fflush(stdout);
 
 }
 
-static void TestSort(linked_list_t *l) {
-  fprintf(stdout, "Starting sorting the list with %i elements \t ... \t\t ",ListLength(l));
+static void TestSort_pointers(linked_list_t *l) {
+  fprintf(stdout, "\x1b[35mStarting sorting the list with %zu elements \t ... \x1b[m\t\t ",ListLength(l));
   fflush(stdout);
   ListSort(l,intPtrCmp);
-  fprintf(stdout, "Done!\n");
+  fprintf(stdout, "\x1b[35mDone!\x1b[m\n");
 }
 
-static void ConfirmSorting(linked_list_t *l) {
+static void ConfirmSorting_pointers(linked_list_t *l) {
   int originalLength =ListLength(l);
-  fprintf(stdout, "Checking if it's indeed sorted: \t\t ... \t\t ");
+  fprintf(stdout, "\x1b[35mChecking if it's indeed sorted: \t\t ... \x1b[m\t\t ");
   void* embeddedLong;
   for (int residue = 0; residue < originalLength; residue++) {
     ListRemove(l,&embeddedLong);
     assert( *(long*)embeddedLong == residue);
     free(embeddedLong);
   }
-  fprintf(stdout, "Yes, it is!\n\n");
+  fprintf(stdout, "\x1b[35mYes, it is!\x1b[m\n\n");
 }
 
-static void TestDelete(linked_list_t *l) {
+static void TestDelete_pointers(linked_list_t *l) {
   long **largestOriginalNumber;
-  fprintf(stdout, "Removing every Node by repeatedlly removing the 100th-to-last Node, starting from 0 each time! This will take a moment!\n");
+  fprintf(stdout, "\x1b[35mRemoving every Node by repeatedlly removing the 100th-to-last Node, starting from 0 each time! This will take a moment!\x1b[m\n");
   fflush(stdout);
   ListReturnNth(l,(void**)&largestOriginalNumber,ListLength(l)-1);
   while (ListLength(l) >= 100) {
     ListRemoveNth(l,NULL,ListLength(l)-100);
   }
-  fprintf(stdout, "Almost done! Removing the last 100 elements alternating from the font and back:\t ... \t");
+  fprintf(stdout, "\x1b[35mAlmost done! Removing the last 100 elements alternating from the font and back:\t ...\x1b[m \t");
   fflush(stdout);
 
-  while(ListLength(l)>1) { 
+  while(ListLength(l)>1) {
     ListRemove(l,NULL);
     ListRemove_back(l,NULL);
   }
     ListRemove(l,NULL);
-  fprintf(stdout, " Done!\n");
+  fprintf(stdout, " \x1b[35mDone!\x1b[m\n");
 }
 
-static void DisposeLargeList(linked_list_t *l) {
-  fprintf(stdout, "Finally, Disposing the list:\t ... \t");
+static void DisposeLargeList_pointers(linked_list_t *l) {
+  fprintf(stdout, "\x1b[35mFinally, Disposing the list:\t ... \x1b[m \t");
   fflush(stdout);
   ListDispose(l);
-  fprintf(stdout, "All clear!\n");
+  fprintf(stdout, "\x1b[35mAll clear!\x1b[m\n");
 
 
 }
 
-static void TestingALargeLinkedList() {
+static void TestingALargeLinkedList_pointers() {
 
-  fprintf(stdout,"\n--------------------------------   Performance Test for very large Singly-Linked-List   ---------------------------------\n\n");
+  fprintf(stdout,"\n--------------------------------   Performance Test for very large Singly-Linked-List \x1b[35mpoiners\x1b[m ----------------------------\n\n");
   static const long prime1 = 100391;
   static const long prime2 = 201577;
 
-  int* toFind = malloc(sizeof(long));
-  *toFind = 711;
+  int toFind = 711;
 
-  linked_list_t numbers = ListInit(freePtrInt);
+  linked_list_t numbers_pointers;
+  ListInit(&numbers_pointers,sizeof(long*),freePtrInt);
 
-  InsertPermutationOfNumber(&numbers,prime1,prime2);
-  FindANumber(&numbers,toFind);
-  TestSort(&numbers);
-  ConfirmSorting(&numbers);
+  InsertPermutationOfNumber_pointers(&numbers_pointers,prime1,prime2);
+  FindANumber_pointers(&numbers_pointers,&toFind);
+  TestSort_pointers(&numbers_pointers);
+  ConfirmSorting_pointers(&numbers_pointers);
 
-   InsertPermutationOfNumber(&numbers,prime1,prime2); // Refilling the list.
+  InsertPermutationOfNumber_pointers(&numbers_pointers,prime1,prime2); // Refilling the list.
 
-  TestDelete(&numbers);
-  DisposeLargeList(&numbers);
-  free(toFind);
+  TestDelete_pointers(&numbers_pointers);
+  DisposeLargeList_pointers(&numbers_pointers);
 }
 
-static void StructTest() {
+static void StructTest_pointers() {
   deck testDeck;
   int deckSize = 36;
   DeckInit(&testDeck,deckSize);
   DeckFill(&testDeck);
   Shuffle(&testDeck);
 
-  linked_list_t cardList = ListInit(freePtrCard);
+  linked_list_t cardList;
+  ListInit(&cardList,sizeof(card*),freePtrCard);
 
-  fprintf(stdout,"\n------------------------------   Creating a Singly-Linked-List for card* (struct*)  ---------------------------------\n");
-  fprintf(stdout,"\nFirst we insert a shuffled Deck of cards containing %d pointers to cards on the heap into a linked list\n",deckSize);
-
+  fprintf(stdout,"\n------------------------------   Creating a Singly-Linked-List for \x1b[35mcard* (struct*)\x1b[m  ---------------------------------\n");
+  fprintf(stdout,"\n\x1b[35mFirst we insert a shuffled Deck of cards containing %d pointers to cards on the heap into a linked list\x1b[m\n\n",deckSize);
   for (int i=0; i<testDeck.size; ++i) {
     card *tmpCard = malloc(sizeof(card));
     *tmpCard = testDeck.deck[i];
-    ListInsert(&cardList,tmpCard);
+    ListInsert(&cardList,&tmpCard);
   }
   DeckDestroy(&testDeck);
 
   ListMap(&cardList,printPtrCard,stdout);
   fprintf(stdout,"\n");
 
-  fprintf(stdout,"\nNow we use ListSort with compare function cmpCard to sort the linked list\n");
+  fprintf(stdout,"\n\x1b[35mNow we use ListSort with compare function cmpPtrCard to sort the linked list\x1b[m\n");
   ListSort(&cardList,cmpPtrCard);
 
   ListMap(&cardList,printPtrCard,stdout);
   fprintf(stdout,"\n");
- 
-  fprintf(stdout,"\nNext, we remove a card from the deck at position 11\n");
+
+  fprintf(stdout,"\n\x1b[35mNext, we remove a card from the deck at position 11\x1b[m\n");
   card *cardReturned = NULL;
   ListRemoveNth(&cardList,(void*)&cardReturned,11);
 
-  fprintf(stdout,"The removed card is: \t\t\t\t\t\t\t");
-  fprintf(stdout,"RemovedCard: %d%c \n",cardReturned->value, cardReturned->suit);
+  fprintf(stdout,"\x1b[35mThe removed card is: \x1b[m\t\t\t\t\t\t\t");
+  fprintf(stdout,"\x1b[35mRemovedCard: \x1b[m%d%c \n",cardReturned->value, cardReturned->suit);
 
-  fprintf(stdout,"The list now looks like this:\n");
+  fprintf(stdout,"\x1b[35mThe list now looks like this:\x1b[m\n\n");
   ListMap(&cardList,printPtrCard,stdout);
   fprintf(stdout,"\n");
 
-  fprintf(stdout,"\nFinally, we dispose the list ... ");
+  fprintf(stdout,"\n\x1b[35mFinally, we dispose the list ... \x1b[m");
   ListDispose(&cardList);
+  fprintf(stdout,"\x1b[35mDone!\x1b[m\n");
 
-  fprintf(stdout,"Done!\n");
-  fprintf(stdout,"Because we're working with pointers, the Removed Card is still here\t");
-  fprintf(stdout,"RemovedCard: %d%c \n",cardReturned->value, cardReturned->suit);
-  fprintf(stdout,"BUT, since we took ownership, we still need to free it as the caller ... ");
+  fprintf(stdout,"\x1b[35mBecause we're working with pointer, the Removed Card is still here\x1b[m\t");
+  fprintf(stdout,"\x1b[35mRemovedCard: \x1b[m%d%c \n",cardReturned->value, cardReturned->suit);
+
+  fprintf(stdout,"\x1b[31mBUT\x1b[m\x1b[35m, since we took ownership, we still need to free it as the caller ... \x1b[m");
   free(cardReturned);
-  fprintf(stdout,"Done!\n");
+  fprintf(stdout,"\x1b[35mDone!\x1b[m\n");
+
+
 }
 
 int main() {
 
   system("clear");
 
-  SimpleTest();
-  TestingALargeLinkedList();
+  SimpleTest_pointers();
+  TestingALargeLinkedList_pointers();
   TestStringList();
-  StructTest();
+  StructTest_pointers();
 }
