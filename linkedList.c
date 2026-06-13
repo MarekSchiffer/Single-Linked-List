@@ -18,7 +18,7 @@ void ListDispose(linked_list_t* l) {
   if (l->freeFn != NULL) {
 
     while(current != NULL) {
-     l->freeFn(current->data);
+     l->freeFn(&current->data);
 
      next = current->next;
      free(current);
@@ -65,7 +65,7 @@ void ListRemove(linked_list_t* l, void** elmAdr) {
     *elmAdr = (l->head)->data;
   }
   else {
-  if (l->freeFn != NULL ) { l->freeFn((l->head)->data); }
+  if (l->freeFn != NULL ) { l->freeFn(&(l->head)->data); }
   }
 
   if (l->head == l->tail) { l->tail = NULL; }
@@ -82,7 +82,7 @@ void ListRemove_back(linked_list_t* l,void** elmAdr) {
   if ( elmAdr != NULL) { *elmAdr = (l->tail)->data; }
   else {
     if ( l->freeFn != NULL ) {
-     l->freeFn((l->tail)->data);
+     l->freeFn(&(l->tail)->data);
     }
   }
 
@@ -108,20 +108,20 @@ int ListFind(linked_list_t* l,void* elm,ListCompareFunction cmp,int startPositio
 
   int count = 0;
   while(current->next != NULL) { 
-    if ( count > startPosition && cmp(current->data,elm) == 0 ) { return count; }
+    if ( count > startPosition && cmp(&current->data,elm) == 0 ) { return count; }
 
     current=current->next;
     count++;
   }
 
   if ( current->next != NULL) { return count; }
-  if ( current->next == NULL && cmp(current->data,elm) == 0 ) { return count; }
+  if ( current->next == NULL && cmp(&current->data,elm) == 0 ) { return count; }
   else return -1;
 
 
 }
 
-static void PopPosition(linked_list_t *l,node_t** n, void** elmAdr) {
+static void PopPosition(linked_list_t *l, node_t** n, void** elmAdr) {
 
   void* newNext = ((*n)->next)->next;
 
@@ -129,8 +129,8 @@ static void PopPosition(linked_list_t *l,node_t** n, void** elmAdr) {
   *elmAdr = ((*n)->next)->data;
   }
 
-  if ( elmAdr == NULL && l->freeFn != NULL ) { 
-    l->freeFn((*n)->next->data);
+  if ( elmAdr == NULL && l->freeFn != NULL ) {
+    l->freeFn(&(*n)->next->data);
   }
 
   free((*n)->next);
@@ -195,21 +195,21 @@ void ListReturnNth(linked_list_t* l,void** elmAdr, int position) {
     current = current->next;
   }
 
-  *elmAdr = current->data;
+  *elmAdr = &current->data;
 
 }
 
 void ListMap(linked_list_t* l, ListMapFunction map,void* auxData) {
   node_t* current = l->head;
   while(current != NULL ) {
-    map(current->data,auxData);
+    map(&current->data,auxData);
     current=current->next;
   }
 }
 
 static void insert(const node_t* n, linked_list_t* l, ListCompareFunction cmp) {
-  node_t *current = l->head;
-  node_t *newNode = malloc(sizeof(node_t));
+  node_t* current = l->head;
+  node_t* newNode = malloc(sizeof(node_t));
   newNode->data = n->data;
 
   if (current == NULL) {
@@ -220,14 +220,14 @@ static void insert(const node_t* n, linked_list_t* l, ListCompareFunction cmp) {
       return;
   }
 
-  if (cmp(newNode->data,current->data) <= 0) {
+  if (cmp(&newNode->data,&current->data) <= 0) {
       newNode->next = l->head;
       l->head = newNode;
       l->size +=1;
     return;
   }
 
-  while( current->next != NULL && cmp(newNode->data,(current->next)->data) > 0) {
+  while( current->next != NULL && cmp(&newNode->data,&(current->next)->data) > 0) {
     current = current->next;
   }
 
