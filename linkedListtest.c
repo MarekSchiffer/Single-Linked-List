@@ -1,6 +1,6 @@
 /***************************************************************************************************
 *                                                                                                  *
-*      This program tests the Single Linked List and is heavily based on a test by Jerry Cain      *
+*      This program tests the Singly Linked List and is heavily based on a test by Jerry Cain      *
 *                                                                                                  *
 ***************************************************************************************************/
 #include "linkedList.h"
@@ -65,7 +65,7 @@ static void InsertNumbers(linked_list_t *l) {
   int* tmp;
 
   for(int number = '0'; number <= '9'; number++) {
-    tmp = malloc(sizeof(int));
+    tmp = malloc(sizeof(char));
     *tmp = number;
     ListInsert_front(l,tmp);
   }
@@ -224,7 +224,7 @@ static void TestDispose(linked_list_t *l) {
 
 static void SimpleTest() {
 
-  fprintf(stdout,"\n------------------------------------   Creating a Sinlge-Linked-List for chars   ---------------------------------------\n");
+  fprintf(stdout,"\n------------------------------------   Creating a Singly-Linked-List for chars   ---------------------------------------\n");
   fprintf(stdout,"------------------------------------   Testing every functionality implemented   ---------------------------------------\n\n");
 
   linked_list_t alphabet = ListInit(freeChr);
@@ -239,8 +239,8 @@ static void SimpleTest() {
 }
 
 static void TestStringList() {
-  
-  fprintf(stdout,"\n--------------------------------------   Creating a Sinlge-Linked-List for Strings   ------------------------------------\n\n");
+
+  fprintf(stdout,"\n--------------------------------------   Creating a Singly-Linked-List for Strings   ------------------------------------\n\n");
 
   linked_list_t stringList = ListInit(freeStr);
 
@@ -270,13 +270,13 @@ static void TestStringList() {
     fprintf(stdout,"\n\nPrinting names[%i] before freeing: %s ... ",6,names[6]);
 
     ListDispose(&stringList);
-    
+
     fprintf(stdout,"Linked List Disposed ... ");
     fprintf(stdout,"Printing names[%i] after freeing: %s\n",6,names[6]);
     fprintf(stdout,"We still have: \t %s \t",keep);
     fprintf(stdout,"Freeing the strdup memory with free(keep)\n");
     free(keep);
-} 
+}
 
 static void InsertPermutationOfNumber(linked_list_t *l, long n, long d) {
   clock_t start, end; char result[12];
@@ -287,13 +287,13 @@ static void InsertPermutationOfNumber(linked_list_t *l, long n, long d) {
      long* residue = malloc(sizeof(long));
      *residue = (long) (((long long)k * (long long)n) % d);
      ListInsert(l,residue);
-  }  
+  }
 
 }
 
 static void FindANumber(linked_list_t *l,int* toFind) {
   int position;
-  
+
   fprintf(stdout, "Looking for number %i in the list \t\t ... \t\t ",*toFind);
   fflush(stdout);
 
@@ -314,7 +314,7 @@ static void TestSort(linked_list_t *l) {
 static void ConfirmSorting(linked_list_t *l) {
   int originalLength =ListLength(l);
   fprintf(stdout, "Checking if it's indeed sorted: \t\t ... \t\t ");
-  void* embeddedLong; // = malloc(sizeof(long));
+  void* embeddedLong;
   for (int residue = 0; residue < originalLength; residue++) {
     ListRemove(l,&embeddedLong);
     assert( *(long*)embeddedLong == residue);
@@ -324,7 +324,7 @@ static void ConfirmSorting(linked_list_t *l) {
 }
 
 static void TestDelete(linked_list_t *l) {
-  long* largestOriginalNumber; // = malloc(sizeof(long));
+  long* largestOriginalNumber;
   fprintf(stdout, "Removing every Node by repeatedlly removing the 100th-to-last Node, starting from 0 each time! This will take a moment!\n");
   fflush(stdout);
   ListReturnNth(l,(void*)&largestOriginalNumber,ListLength(l)-1);
@@ -334,7 +334,7 @@ static void TestDelete(linked_list_t *l) {
   fprintf(stdout, "Almost done! Removing the last 100 elements alternating from the font and back:\t ... \t");
   fflush(stdout);
 
-  while(ListLength(l)>1) { 
+  while(ListLength(l)>1) {
     ListRemove(l,NULL);
     ListRemove_back(l,NULL);
   }
@@ -353,11 +353,11 @@ static void DisposeLargeList(linked_list_t *l) {
 
 static void TestingALargeLinkedList() {
 
-  fprintf(stdout,"\n--------------------------------   Performance Test for very large Single-Linked-List   ---------------------------------\n\n");
+  fprintf(stdout,"\n--------------------------------   Performance Test for very large Singly-Linked-List   ---------------------------------\n\n");
   static const long prime1 = 100391;
   static const long prime2 = 201577;
 
-  int* toFind = malloc(sizeof(int));
+  int* toFind = malloc(sizeof(long));
   *toFind = 711;
 
   linked_list_t numbers = ListInit(freeInt);
@@ -384,7 +384,7 @@ static void StructTest() {
 
   linked_list_t cardList = ListInit(freeCard);
 
-  fprintf(stdout,"\n------------------------------   Creating a Sinlge-Linked-List for card* (struct*)  ---------------------------------\n");
+  fprintf(stdout,"\n------------------------------   Creating a Singly-Linked-List for card* (struct*)  ---------------------------------\n");
   fprintf(stdout,"\nFirst we insert a shuffled Deck of cards containing %d pointers to cards on the heap into a linked list\n",deckSize);
 
 
@@ -404,7 +404,7 @@ static void StructTest() {
 
   ListMap(&cardList,printCard,stdout);
   fprintf(stdout,"\n");
- 
+
   fprintf(stdout,"\nNext, we remove a card from the deck at position 11\n");
   card *cardReturned = NULL;
   ListRemoveNth(&cardList,(void*)&cardReturned,11);
