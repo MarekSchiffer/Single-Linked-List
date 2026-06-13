@@ -1,12 +1,8 @@
 #include "linkedList.h"
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
-list ListInit(void (*freeFn)(void*)) {
-  list localList;
-  localList.head = malloc(sizeof(node));
+linked_list_t ListInit(void (*freeFn)(void*)) {
+  linked_list_t localList;
+//  localList.head = malloc(sizeof(node_t));
   localList.head = NULL;
   localList.tail = NULL;
   localList.size = 0;
@@ -15,9 +11,9 @@ list ListInit(void (*freeFn)(void*)) {
   return localList;
 }
 
-void ListDispose(list* l) {
-  node* current = l->head;
-  node* next;
+void ListDispose(linked_list_t* l) {
+  node_t* current = l->head;
+  node_t* next;
 
   if (l->freeFn != NULL) {
 
@@ -39,8 +35,8 @@ void ListDispose(list* l) {
 
 }
 
-void ListInsert_front(list* l, void* elmAdr) {
-      node* newNode = malloc(sizeof(node));
+void ListInsert_front(linked_list_t* l, void* elmAdr) {
+      node_t* newNode = malloc(sizeof(node_t));
       newNode->data = elmAdr;
       newNode->next = l->head;
       l->head = newNode;
@@ -49,11 +45,11 @@ void ListInsert_front(list* l, void* elmAdr) {
   if ( l->tail == NULL ) { l->tail = newNode; }
 }
 
-void ListInsert(list* l, void* elmAdr) {
+void ListInsert(linked_list_t* l, void* elmAdr) {
 
   if ( l->tail == NULL && l->size == 0) { ListInsert_front(l,elmAdr); return; }
 
-  node* newNode = malloc(sizeof(node));
+  node_t* newNode = malloc(sizeof(node_t));
   newNode->data = elmAdr;
   newNode->next = NULL;
 
@@ -62,7 +58,7 @@ void ListInsert(list* l, void* elmAdr) {
   l->size++;
 }
 
-void ListRemove(list* l, void** elmAdr) {
+void ListRemove(linked_list_t* l, void** elmAdr) {
   assert( l->head != NULL);
 
   if (elmAdr != NULL) {
@@ -74,14 +70,14 @@ void ListRemove(list* l, void** elmAdr) {
 
   if (l->head == l->tail) { l->tail = NULL; }
 
-  node* next = (l->head)->next;
+  node_t* next = (l->head)->next;
   free(l->head);
   l->head = next;
   l->size -=1;
 }
 
-void ListRemove_back(list* l,void** elmAdr) {
-  node* current = l->head;
+void ListRemove_back(linked_list_t* l,void** elmAdr) {
+  node_t* current = l->head;
 
   if ( elmAdr != NULL) { *elmAdr = (l->tail)->data; }
   else {
@@ -101,14 +97,14 @@ void ListRemove_back(list* l,void** elmAdr) {
   l->size--;
 }
 
-int ListLength(list* l) {
+int ListLength(linked_list_t* l) {
   return l->size;
 }
 
-int ListFind(list* l,void* elm,ListCompareFunction cmp,int startPosition) {
+int ListFind(linked_list_t* l,void* elm,ListCompareFunction cmp,int startPosition) {
   assert(l->head != NULL);
 
-  node* current = l->head;
+  node_t* current = l->head;
 
   int count = 0;
   while(current->next != NULL) { 
@@ -125,7 +121,7 @@ int ListFind(list* l,void* elm,ListCompareFunction cmp,int startPosition) {
 
 }
 
-static void PopPosition(node** n, void** elmAdr) {
+static void PopPosition(linked_list_t *l,node_t** n, void** elmAdr) {
 
   void* newNext = ((*n)->next)->next;
 
@@ -133,11 +129,15 @@ static void PopPosition(node** n, void** elmAdr) {
   *elmAdr = ((*n)->next)->data;
   }
 
+  if ( elmAdr == NULL && l->freeFn != NULL ) { 
+    l->freeFn((*n)->next->data);
+  }
+
   free((*n)->next);
   (*n)->next = newNext;
 }
 
-void ListRemoveNth(list *l,void** elmAdr, int position) {
+void ListRemoveNth(linked_list_t *l,void** elmAdr, int position) {
   assert( 0<= position <= l->size);
   assert( l->head != NULL);
   assert( l->head != NULL);
@@ -145,13 +145,13 @@ void ListRemoveNth(list *l,void** elmAdr, int position) {
   if (position == 0)         { ListRemove(l,elmAdr); return; }
   if (position == l->size) { ListRemove_back(l,elmAdr); return; }
 
-  node* current = l->head;
+  node_t* current = l->head;
 
   for(int i=0; i<position-1; i++) {
     current = current->next;
   }
 
-  PopPosition(&current,elmAdr);
+  PopPosition(l,&current,elmAdr);
   l->size--;
 
   return;
@@ -159,9 +159,9 @@ void ListRemoveNth(list *l,void** elmAdr, int position) {
 
 }
 
-static void PushPosition(node** n,void* Adr) {
+static void PushPosition(node_t** n,void* Adr) {
 
-  node* newNode = malloc(sizeof(node));
+  node_t* newNode = malloc(sizeof(node_t));
   newNode->data = Adr;
   newNode->next = (*n)->next;
   (*n)->next = newNode;
@@ -169,13 +169,13 @@ static void PushPosition(node** n,void* Adr) {
   return;
 }
 
-void ListInsertNth(list* l,void* elmAdr, int position) {
+void ListInsertNth(linked_list_t* l,void* elmAdr, int position) {
   assert(0<= position <= l->size);
 
   if (position == 0)         { ListInsert_front(l,elmAdr); return; }
   if (position == l->size)   { ListInsert(l,elmAdr); return; }
 
-  node* current = l->head;
+  node_t* current = l->head;
 
   for(int i=0; i<position-1; i++) {
     current = current->next;
@@ -185,11 +185,11 @@ void ListInsertNth(list* l,void* elmAdr, int position) {
   l->size++;
 }
 
-void ListReturnNth(list* l,void** elmAdr, int position) {
+void ListReturnNth(linked_list_t* l,void** elmAdr, int position) {
   assert(0<= position <= l->size);
   assert( l->head != NULL);
 
-  node* current = l->head;
+  node_t* current = l->head;
 
   for(int i=0; i<position; i++) {
     current = current->next;
@@ -199,17 +199,17 @@ void ListReturnNth(list* l,void** elmAdr, int position) {
 
 }
 
-void ListMap(list* l, ListMapFunction map,void* auxData) {
-  node* current = l->head;
+void ListMap(linked_list_t* l, ListMapFunction map,void* auxData) {
+  node_t* current = l->head;
   while(current != NULL ) {
     map(current->data,auxData);
     current=current->next;
   }
 }
 
-static void insert(const node* n, list* l, ListCompareFunction cmp) {
-  node* current = l->head;
-  node* newNode = malloc(sizeof(node));
+static void insert(const node_t* n, linked_list_t* l, ListCompareFunction cmp) {
+  node_t *current = l->head;
+  node_t *newNode = malloc(sizeof(node_t));
   newNode->data = n->data;
 
   if (current == NULL) {
@@ -241,21 +241,22 @@ static void insert(const node* n, list* l, ListCompareFunction cmp) {
 
 }
 
-void ListSort(list* l,ListCompareFunction cmp) {
-  list sortedList = ListInit(l->freeFn);
-  node* current = l->head;
+void ListSort(linked_list_t* l,ListCompareFunction cmp) {
+  linked_list_t sortedList = ListInit(l->freeFn);
+  node_t* current = l->head;
 
   int i = 0;
   while ( current != NULL ) {
     i++;
-    node* toInsert = malloc(sizeof(node));
+    node_t* toInsert = malloc(sizeof(node_t));
     toInsert->data = current->data;
     insert(toInsert,&sortedList,cmp);
 //    if ( i % 1000 == 0 ) {fprintf(stdout,"Still Sorting: %i\n",i); fflush(stdout); }
 
-    node* saveCurrent = current;
+    node_t* saveCurrent = current;
     current = current->next;
     free(saveCurrent);
+    free(toInsert);
 
   }
 
